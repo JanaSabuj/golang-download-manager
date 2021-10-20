@@ -9,11 +9,14 @@ import (
 func main() {
 	fmt.Println("Welcome to my Download Manager !")
 
+	fileUrl := "https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_5MG.mp3"
+	fileTargetPath := "abc.mp3"
+
 	startTime := time.Now()
 	// initialise a download manager
 	dm := Download{
-		Url:           "https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_5MG.mp3",
-		Targetpath:    "abc.mp3",
+		Url:           fileUrl,
+		Targetpath:    fileTargetPath,
 		TotalSections: 10,
 	}
 

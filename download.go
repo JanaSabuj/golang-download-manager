@@ -116,7 +116,6 @@ func (dm Download) downloadChunk(idx int, sec [2]int) error {
 
 	fmt.Printf("Downloaded %v bytes for Section %v\n", resp.ContentLength, idx)
 	b, err := ioutil.ReadAll(resp.Body)
-
 	if err != nil {
 		return err
 	}
