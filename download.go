@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 )
 
 type Download struct {
@@ -36,12 +37,12 @@ func (dm Download) Do() error {
 	}
 
 	size, err := strconv.Atoi(resp.Header.Get("Content-Length"))
-	fmt.Printf("File has a size of %d bytes or %f MB\n\n", size, float64(size)/1000.0)
+	fmt.Printf("File has a size of %d bytes or %f MB\n\n", size, float64(size)/1000000.0)
 
 	// create file chunks
 	var sections = make([][2]int, dm.TotalSections)
 	eachSize := size / dm.TotalSections
-	fmt.Println("Each chunk size is %v bytes\n", eachSize)
+	fmt.Printf("Each chunk size is %v bytes\n", eachSize)
 
 	// [[0 10][10 20]....[99 end-1]] - total 100 byte file for ex
 	for i := range sections {
@@ -60,13 +61,19 @@ func (dm Download) Do() error {
 	log.Println(sections)
 
 	// 2. Download each chunk concurrently
+	var wg sync.WaitGroup
 	for i, s := range sections {
-		err := dm.downloadChunk(i, s)
-		if err != nil {
-			panic(err)
-		}
+		wg.Add(1)
+		go func(i int, s [2]int) {
+			defer wg.Done()
+			err := dm.downloadChunk(i, s)
+			if err != nil {
+				panic(err)
+			}
+		}(i, s)
 	}
 
+	wg.Wait()
 	err = dm.mergeFiles()
 	if err != nil {
 		return err
